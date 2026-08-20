@@ -46,6 +46,14 @@ class SnapchatController:
             time.sleep(0.5)
         raise ElementNotFoundError(f"Selectors not found: {selectors}")
 
+    def is_installed(self) -> bool:
+        """Checks if Snapchat package is installed on device."""
+        try:
+            output = self.adb.run_shell(f"pm list packages {self.config.package_name}")
+            return self.config.package_name in output
+        except Exception:
+            return False
+
     def open(self) -> None:
         """Launches Snapchat app and waits for initial screen readiness."""
         logger.info("Opening Snapchat application...")
@@ -77,6 +85,11 @@ class SnapchatController:
         """Verifies if Snapchat is alive, installed, and in a valid responsive state."""
         logger.info("Performing Snapchat health check...")
         try:
+            # If Snapchat is not installed yet on device, log warning without failing health check
+            if not self.is_installed():
+                logger.warning(f"Snapchat package ({self.config.package_name}) is not installed on device yet. Awaiting initial APK installation.")
+                return True
+
             output = self.adb.run_shell(f"pidof {self.config.package_name}")
             if not output.strip():
                 logger.warning("Snapchat process PID not found.")

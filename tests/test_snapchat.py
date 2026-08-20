@@ -17,7 +17,13 @@ def test_snapchat_controller_init():
 def test_snapchat_health_check_process_dead():
     config = SnapchatConfig()
     mock_adb = MagicMock()
-    mock_adb.run_shell.return_value = ""  # empty pid string
+    # Return package name for pm list packages, empty string for pidof
+    def mock_shell(cmd, **kwargs):
+        if "pm list packages" in cmd:
+            return f"package:{config.package_name}"
+        return ""
+
+    mock_adb.run_shell.side_effect = mock_shell
 
     controller = SnapchatController(mock_adb, config)
     assert controller.health_check() is False
