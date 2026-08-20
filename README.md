@@ -7,7 +7,6 @@ Production-grade, highly resilient Snapchat automation bot designed to run 24/7 
 ## 🌟 Key Features
 
 - **Continuous 30-60 Day Unattended Operation**: Self-healing architecture built for unattended long-term execution.
-- **Web-based GUI Control (`ws-scrcpy`)**: Direct browser access to the Android screen on port `8000` (`http://<server-ip>:8000`).
 - **Randomized Execution Windows**: Schedules daily snap runs at a random minute within configured time windows (e.g. between 09:00-11:00 and 20:00-22:00) to mimic natural human activity.
 - **5-Tier Escalation Recovery Matrix**:
   1. *Tier 1*: Force stop Snapchat and relaunch.
@@ -54,7 +53,7 @@ snapbot/
 │   └── screenshot.py        # Failure screenshot capture
 ├── tests/                   # Pytest test suite
 ├── Dockerfile               # Production Docker image build
-├── docker-compose.yml       # ReDroid + ws-scrcpy + SnapBot stack definition
+├── docker-compose.yml       # ReDroid + SnapBot stack definition
 ├── requirements.txt         # Dependencies
 └── main.py                  # Entrypoint CLI
 ```
@@ -75,19 +74,23 @@ sudo modprobe binder_linux devices="binder,hwbinder,vndbinder"
 docker-compose up -d --build
 ```
 
-### 3. Open Web UI & Perform Initial Snapchat Login
-Open your web browser and navigate to:
+### 3. Visual GUI Access & Snapchat Setup via `scrcpy`
+ReDroid exposes port `5555`. You can visually view and control the Android screen directly from your local computer via network `scrcpy`:
+
+```bash
+# On your local computer (Mac/Linux/Windows):
+adb connect <UBUNTU_SERVER_IP>:5555
+scrcpy -s <UBUNTU_SERVER_IP>:5555
 ```
-http://<YOUR_SERVER_IP>:8000
-```
-- Select the connected ReDroid device.
-- The live Android touchscreen interface will render directly in your browser.
-- Install Snapchat, log in to your account, and complete initial permissions/2FA setup.
+
+- Install Snapchat APK (`adb -s <UBUNTU_SERVER_IP>:5555 install snapchat.apk`).
+- Perform initial account login and approve initial permissions.
+- Once logged in, the session persists inside `redroid-data` volume for 30-60 days.
 
 ---
 
 ## 💻 Local CLI Test Execution
-To run an immediate manual snap workflow test run without waiting for the scheduler:
+To run an immediate manual snap workflow test run:
 ```bash
 python main.py --now
 ```
