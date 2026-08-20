@@ -15,6 +15,15 @@ services:
       - androidboot.redroid.gpu.mode=guest
     restart: always
 
+  ws-scrcpy:
+    image: netptop/site-scrcpy:latest
+    container_name: ws-scrcpy
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redroid
+    restart: always
+
   snapbot:
     build: .
     container_name: snapbot

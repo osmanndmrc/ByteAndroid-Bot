@@ -7,6 +7,7 @@ Production-grade, highly resilient Snapchat automation bot designed to run 24/7 
 ## 🌟 Key Features
 
 - **Continuous 30-60 Day Unattended Operation**: Self-healing architecture built for unattended long-term execution.
+- **Web-based GUI Control (`ws-scrcpy`)**: Direct browser access to the Android screen on port `8000` (`http://<server-ip>:8000`).
 - **Randomized Execution Windows**: Schedules daily snap runs at a random minute within configured time windows (e.g. between 09:00-11:00 and 20:00-22:00) to mimic natural human activity.
 - **5-Tier Escalation Recovery Matrix**:
   1. *Tier 1*: Force stop Snapchat and relaunch.
@@ -53,44 +54,40 @@ snapbot/
 │   └── screenshot.py        # Failure screenshot capture
 ├── tests/                   # Pytest test suite
 ├── Dockerfile               # Production Docker image build
-├── docker-compose.yml       # ReDroid + SnapBot stack definition
+├── docker-compose.yml       # ReDroid + ws-scrcpy + SnapBot stack definition
 ├── requirements.txt         # Dependencies
 └── main.py                  # Entrypoint CLI
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started (Linux Server Deployment)
 
-### 1. Requirements
-- Linux Server (Ubuntu 20.04/22.04/24.04 recommended)
-- Docker & Docker Compose
-- ReDroid container running (`redroid/redroid:11.0.0-latest`)
-
-### 2. Local Setup
+### 1. Host Kernel Preparation (Linux / Ubuntu Server)
 ```bash
-# Clone repository
-git clone https://github.com/your-repo/ByteAndroid-Bot.git
-cd ByteAndroid-Bot
-
-# Create virtual environment and install dependencies
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+sudo apt update
+sudo apt install -y linux-modules-extra-$(uname -r)
+sudo modprobe binder_linux devices="binder,hwbinder,vndbinder"
 ```
 
-### 3. Run Unit Tests
-```bash
-pytest -v
-```
-
-### 4. Running via Docker Compose
+### 2. Launch Docker Stack
 ```bash
 docker-compose up -d --build
 ```
 
-### 5. Manual Execution Flag
-To run an immediate snap workflow test run without waiting for the scheduler:
+### 3. Open Web UI & Perform Initial Snapchat Login
+Open your web browser and navigate to:
+```
+http://<YOUR_SERVER_IP>:8000
+```
+- Select the connected ReDroid device.
+- The live Android touchscreen interface will render directly in your browser.
+- Install Snapchat, log in to your account, and complete initial permissions/2FA setup.
+
+---
+
+## 💻 Local CLI Test Execution
+To run an immediate manual snap workflow test run without waiting for the scheduler:
 ```bash
 python main.py --now
 ```
