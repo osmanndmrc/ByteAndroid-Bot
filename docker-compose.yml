@@ -28,6 +28,8 @@ services:
       - ./config:/app/config
     environment:
       - PYTHONUNBUFFERED=1
+      - ADB_HOST=redroid
+      - ADB_PORT=5555
     restart: always
 
 volumes:

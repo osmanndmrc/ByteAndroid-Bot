@@ -1,7 +1,8 @@
 """
-Configuration loader module using YAML and Pydantic for validation.
+Configuration loader module using YAML, environment variable overrides, and Pydantic for validation.
 """
 
+import os
 from pathlib import Path
 from typing import List, Optional
 import yaml
@@ -85,7 +86,7 @@ class AppConfig(BaseModel):
 
 
 class ConfigLoader:
-    """Loads and validates application configuration from YAML files."""
+    """Loads and validates application configuration from YAML files with environment overrides."""
 
     @staticmethod
     def load(config_path: str | Path = "config/config.yaml") -> AppConfig:
@@ -95,5 +96,18 @@ class ConfigLoader:
 
         with open(path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f) or {}
+
+        # Environment variable overrides
+        if "adb" not in data:
+            data["adb"] = {}
+        if os.getenv("ADB_HOST"):
+            data["adb"]["host"] = os.getenv("ADB_HOST")
+        if os.getenv("ADB_PORT"):
+            data["adb"]["port"] = int(os.getenv("ADB_PORT"))
+
+        if "redroid" not in data:
+            data["redroid"] = {}
+        if os.getenv("REDROID_CONTAINER_NAME"):
+            data["redroid"]["container_name"] = os.getenv("REDROID_CONTAINER_NAME")
 
         return AppConfig(**data)
