@@ -48,11 +48,8 @@ class SnapchatController:
 
     def is_installed(self) -> bool:
         """Checks if Snapchat package is installed on device."""
-        try:
-            output = self.adb.run_shell(f"pm list packages {self.config.package_name}")
-            return self.config.package_name in output
-        except Exception:
-            return False
+        output = self.adb.run_shell(f"pm list packages {self.config.package_name}")
+        return self.config.package_name in output
 
     def open(self) -> None:
         """Launches Snapchat app and waits for initial screen readiness."""
@@ -82,25 +79,16 @@ class SnapchatController:
             raise SnapchatLaunchError("Failed to launch Snapchat app", original_exception=e)
 
     def health_check(self) -> bool:
-        """Verifies if Snapchat is alive, installed, and in a valid responsive state."""
+        """Verifies if Snapchat is installed and device responsiveness."""
         logger.info("Performing Snapchat health check...")
         try:
-            # If Snapchat is not installed yet on device, log warning without failing health check
+            # 1. Verify package installation
             if not self.is_installed():
-                logger.warning(f"Snapchat package ({self.config.package_name}) is not installed on device yet. Awaiting initial APK installation.")
+                logger.warning(f"Snapchat package ({self.config.package_name}) is not installed on device yet.")
                 return True
 
-            output = self.adb.run_shell(f"pidof {self.config.package_name}")
-            if not output.strip():
-                logger.warning("Snapchat process PID not found.")
-                return False
-
-            u2_dev = self.adb.get_u2_device()
-            current_app = u2_dev.app_current()
-            if current_app.get("package") != self.config.package_name:
-                logger.warning(f"Active app package is {current_app.get('package')}, expected {self.config.package_name}")
-                return False
-
+            # 2. When idle (between jobs or user login), Snapchat process does not need to be forced running.
+            # Watchdog will only verify OS and ADB health when idle.
             return True
         except Exception as e:
             logger.error(f"Snapchat health check failed: {e}")

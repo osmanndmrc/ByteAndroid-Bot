@@ -5,6 +5,7 @@ __pycache__/
 .coverage
 htmlcov/
 *.db
+*.apk
 data/
 logs/
 screenshots/
