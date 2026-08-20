@@ -3,8 +3,7 @@ services:
     image: redroid/redroid:11.0.0-latest
     container_name: redroid
     privileged: true
-    ports:
-      - "5555:5555"
+    network_mode: host
     volumes:
       - redroid-data:/data
     command:
@@ -18,6 +17,7 @@ services:
   snapbot:
     build: .
     container_name: snapbot
+    network_mode: host
     depends_on:
       - redroid
     volumes:
@@ -28,7 +28,7 @@ services:
       - ./config:/app/config
     environment:
       - PYTHONUNBUFFERED=1
-      - ADB_HOST=redroid
+      - ADB_HOST=127.0.0.1
       - ADB_PORT=5555
     restart: always
 
